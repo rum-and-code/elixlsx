@@ -222,6 +222,13 @@ defmodule Elixlsx.XMLTemplates do
         {content, styleID, cellstyle} = split_into_content_style(cell, wci)
 
         content =
+          if is_nil(content) do
+            ""
+          else
+            content
+          end
+
+        content =
           if CellStyle.is_date?(cellstyle) do
             U.to_excel_datetime(content)
           else
