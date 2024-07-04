@@ -1,5 +1,11 @@
 # Elixlsx
 
+> ### Rum&Code
+> ℹ️ This repo is a fork of [xou/elixlsx](https://github.com/xou/elixlsx/tree/master) to fix some of the shortcomings with the original library.
+> #### Changelog & differences
+> - Fix issue where passing `nil` to a cell's content ignores that cell's styling & formatting props
+>   - Add missing pattern in Elixlsx.Util.to_excel_datetime/1 to support empty cells
+
 [![Build Status](https://travis-ci.com/xou/elixlsx.svg?branch=master)](https://travis-ci.org/xou/elixlsx)
 [![Module Version](https://img.shields.io/hexpm/v/elixlsx.svg)](https://hex.pm/packages/elixlsx)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/elixlsx/)

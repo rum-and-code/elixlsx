@@ -221,68 +221,71 @@ defmodule Elixlsx.XMLTemplates do
       |> List.foldl({"", 1}, fn cell, {acc, colidx} ->
         {content, styleID, cellstyle} = split_into_content_style(cell, wci)
 
-        if is_nil(content) do
-          {acc, colidx + 1}
-        else
-          content =
-            if CellStyle.is_date?(cellstyle) do
-              U.to_excel_datetime(content)
-            else
-              content
-            end
+        content =
+          if is_nil(content) do
+            ""
+          else
+            content
+          end
 
-          cv = get_content_type_value(content, wci)
+        content =
+          if CellStyle.is_date?(cellstyle) do
+            U.to_excel_datetime(content)
+          else
+            content
+          end
 
-          {content_type, content_value, content_opts} =
-            case cv do
-              {t, v} ->
-                {t, v, []}
+        cv = get_content_type_value(content, wci)
 
-              {t, v, opts} ->
-                {t, v, opts}
+        {content_type, content_value, content_opts} =
+          case cv do
+            {t, v} ->
+              {t, v, []}
 
-              :error ->
-                raise %ArgumentError{
-                  message:
-                    "Invalid column content at " <>
-                      U.to_excel_coords(rowidx, colidx) <> ": " <> inspect(content)
-                }
-            end
+            {t, v, opts} ->
+              {t, v, opts}
 
-          cell_xml =
-            case content_type do
-              :formula ->
-                value =
-                  if not is_nil(content_opts[:value]),
-                    do: "<v>#{content_opts[:value]}</v>",
-                    else: ""
+            :error ->
+              raise %ArgumentError{
+                message:
+                  "Invalid column content at " <>
+                  U.to_excel_coords(rowidx, colidx) <> ": " <> inspect(content)
+              }
+          end
 
-                """
-                <c r="#{U.to_excel_coords(rowidx, colidx)}"
-                s="#{styleID}">
-                <f>#{content_value}</f>
-                #{value}
-                </c>
-                """
+        cell_xml =
+          case content_type do
+            :formula ->
+              value =
+                if not is_nil(content_opts[:value]),
+                   do: "<v>#{content_opts[:value]}</v>",
+                   else: ""
 
-              :empty ->
-                """
-                <c r="#{U.to_excel_coords(rowidx, colidx)}"
-                s="#{styleID}">
-                </c>
-                """
+              """
+              <c r="#{U.to_excel_coords(rowidx, colidx)}"
+              s="#{styleID}">
+              <f>#{content_value}</f>
+              #{value}
+              </c>
+              """
 
-              type ->
-                """
-                <c r="#{U.to_excel_coords(rowidx, colidx)}"
-                s="#{styleID}" t="#{type}">
-                <v>#{content_value}</v>
-                </c>
-                """
-            end
+            :empty ->
+              """
+              <c r="#{U.to_excel_coords(rowidx, colidx)}"
+              s="#{styleID}">
+              </c>
+              """
 
-          {acc <> cell_xml, colidx + 1}
-        end
+            type ->
+              """
+              <c r="#{U.to_excel_coords(rowidx, colidx)}"
+              s="#{styleID}" t="#{type}">
+              <v>#{content_value}</v>
+              </c>
+              """
+          end
+
+        {acc <> cell_xml, colidx + 1}
       end)
 
     updated_row
