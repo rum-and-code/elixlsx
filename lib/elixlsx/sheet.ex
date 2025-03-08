@@ -226,4 +226,14 @@ defmodule Elixlsx.Sheet do
   def add_data_validations(sheet, start_cell, end_cell, values) do
     %{sheet | data_validations: [{start_cell, end_cell, values} | sheet.data_validations]}
   end
+
+  @spec merge_cells(Sheet.t(), String.t(), String.t()) :: Sheet.t()
+  def merge_cells(sheet, start_cell, end_cell) do
+    %{sheet | merge_cells: [{start_cell, end_cell} | sheet.merge_cells]}
+  end
+
+  @spec unmerge_cells(Sheet.t(), String.t(), String.t()) :: Sheet.t()
+  def unmerge_cells(sheet, start_cell, end_cell) do
+    %{sheet | merge_cells: List.delete(sheet.merge_cells, {start_cell, end_cell})}
+  end
 end
