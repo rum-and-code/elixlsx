@@ -126,4 +126,23 @@ defmodule ElixlsxTest do
                    end
     end)
   end
+
+  test "merge cells in sheet" do
+    Sheet.with_name("Sheet1")
+    |> Sheet.set_cell("A1", "A1 - content")
+    |> Sheet.set_cell("A2", "A2 - content")
+    |> Sheet.merge_cells("A1", "A2")
+    |> then(&%Workbook{sheets: [&1]})
+    |> Elixlsx.write_to("merge_test.xlsx")
+  end
+
+  test "merge cells in sheet and unmerge cells" do
+    Sheet.with_name("Sheet1")
+    |> Sheet.set_cell("A1", "A1 - content")
+    |> Sheet.set_cell("A2", "A2 - content")
+    |> Sheet.merge_cells("A1", "A2")
+    |> Sheet.unmerge_cells("A1", "A2")
+    |> then(&%Workbook{sheets: [&1]})
+    |> Elixlsx.write_to("merge_unmerge_test.xlsx")
+  end
 end
