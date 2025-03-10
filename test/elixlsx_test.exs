@@ -145,4 +145,27 @@ defmodule ElixlsxTest do
     |> then(&%Workbook{sheets: [&1]})
     |> Elixlsx.write_to("merge_unmerge_test.xlsx")
   end
+
+  test "set range value" do
+    Sheet.with_name("Sheet1")
+    |> Sheet.set_cell_range("A1", "C1", "header")
+    |> Sheet.set_cell_range("A2", "C2", "A")
+    |> Sheet.set_cell_range("A3", "C4", "B")
+    |> Sheet.set_cell_range("A5", "A6", "C")
+    |> Sheet.to_csv_string()
+    |> String.split("\n")
+    |> Enum.map(fn line -> String.split(line, ",") end)
+    |> then(
+      &assert(
+        &1 == [
+          ["header", "header", "header"],
+          ["A", "A", "A"],
+          ["B", "B", "B"],
+          ["B", "B", "B"],
+          ["C"],
+          ["C"]
+        ]
+      )
+    )
+  end
 end
