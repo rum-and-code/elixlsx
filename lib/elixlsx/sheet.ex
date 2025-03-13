@@ -245,7 +245,6 @@ defmodule Elixlsx.Sheet do
         |> Enum.reduce(
           sheet,
           fn {y, x}, sheet ->
-            IO.inspect({y, x}, label: "set_cell_range")
             Sheet.set_at(sheet, y, x, content, opts)
           end
         )
