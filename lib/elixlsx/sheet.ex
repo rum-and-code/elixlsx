@@ -227,6 +227,30 @@ defmodule Elixlsx.Sheet do
     %{sheet | data_validations: [{start_cell, end_cell, values} | sheet.data_validations]}
   end
 
+  @spec set_cell_range(Sheet.t(), String.t() | {non_neg_integer(), non_neg_integer()}, String.t() | {non_neg_integer(), non_neg_integer()}, any(), Keyword.t()) :: Sheet.t()
+  def set_cell_range(sheet, from, to, content, opts \\ [])
+  def set_cell_range(sheet, from, to, content, opts) when is_binary(from), do: set_cell_range(sheet, Elixlsx.Util.from_excel_coords0(from), to, content, opts)
+  def set_cell_range(sheet, from, to, content, opts) when is_binary(to), do: set_cell_range(sheet, from, Elixlsx.Util.from_excel_coords0(to), content, opts)
+  def set_cell_range(sheet, {from_y, from_x}, {to_y, to_x}, content, opts) when from_y > to_y, do: set_cell_range(sheet, {to_y, from_x}, {from_y, to_x}, content, opts)
+  def set_cell_range(sheet, {from_y, from_x}, {to_y, to_x}, content, opts) when from_x > to_x, do: set_cell_range(sheet, {from_y, to_x}, {to_y, from_x}, content, opts)
+
+  def set_cell_range(sheet, {from_y, from_x}, {to_y, to_x}, content, opts) do
+    Stream.iterate({from_y, from_x}, fn {y, x} -> {y + 1, x} end)
+    |> Enum.take_while(fn {y, _} -> y <= to_y end)
+    |> Enum.reduce(
+      sheet,
+      fn {y, x}, sheet ->
+        Stream.iterate({y, x}, fn {y, x} -> {y, x + 1} end)
+        |> Enum.take_while(fn {_, x} -> x <= to_x end)
+        |> Enum.reduce(
+          sheet,
+          fn {y, x}, sheet ->
+            Sheet.set_at(sheet, y, x, content, opts)
+          end
+        )
+      end)
+  end
+
   @spec merge_cells(Sheet.t(), String.t(), String.t()) :: Sheet.t()
   def merge_cells(sheet, start_cell, end_cell) do
     %{sheet | merge_cells: [{start_cell, end_cell} | sheet.merge_cells]}
